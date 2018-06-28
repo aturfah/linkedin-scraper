@@ -35,18 +35,20 @@ image_urls = []
 browser = webdriver.Chrome(chromedriver_path)
 while urls_to_try and total_urls < MAX_URLS:
     url = urls_to_try[0]
+    print(url)
 
     print(urls_to_try)
     urls_to_try.remove(url)
 
     browser.get(url)
     try:
-        # Get Other Profiles
+        # Get Other Profiles if we're not over the limit
         other_profiles = browser.find_element_by_class_name("pv-browsemap-section").find_element_by_tag_name("ul").find_elements_by_tag_name("li")
-        for profile_row in other_profiles:
-            profile_link = profile_row.find_element_by_tag_name("a").get_attribute("href")
-            profile_link = "https://www.linkedin.com{}".format(profile_link)
-            urls_to_try.append(profile_link)
+        if len(image_urls) + total_urls < MAX_URLS:
+            for profile_row in other_profiles:
+                profile_link = profile_row.find_element_by_tag_name("a").get_attribute("href")
+                # profile_link = "https://www.linkedin.com{}".format(profile_link)
+                urls_to_try.append(profile_link)
 
         print("Getting Profile Image...")
         # Get page's profile image
