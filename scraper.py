@@ -62,15 +62,13 @@ while urls_to_try and total_urls < MAX_URLS:
     browser.get(url)
     try:
         # Get Other Profiles if we're not over the limit
-        other_profiles = browser.find_element_by_class_name(
-            "pv-browsemap-section")
+        other_profiles = browser.find_element_by_class_name("pv-browsemap-section")
         other_profiles = other_profiles.find_element_by_tag_name("ul")
         other_profiles = other_profiles.find_elements_by_tag_name("li")
 
         for profile_row in other_profiles:
-            if total_urls + len(urls_to_try) + len(other_profiles) < MAX_URLS:
-                profile_link = profile_row.find_element_by_tag_name(
-                    "a").get_attribute("href")
+            if total_urls + len(urls_to_try) < MAX_URLS:
+                profile_link = profile_row.find_element_by_tag_name("a").get_attribute("href")
                 urls_to_try.append(profile_link)
 
         print("Getting Profile Image #{}...".format(total_urls))
