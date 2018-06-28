@@ -7,6 +7,8 @@ from shutil import rmtree
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
+import requests
+
 
 # Set up preliminary folders/path stuff
 LINKEDIN_DIR = "photos"
@@ -22,8 +24,8 @@ if not chromedriver_path in sys.path:
     sys.path.append(chromedriver_path)
 
 # Browse without opening window
-chrome_options = Options()  
-chrome_options.add_argument("--headless")  
+chrome_options = Options()
+chrome_options.add_argument("--headless")
 
 
 # Scrape Pages
@@ -43,30 +45,34 @@ while urls_to_try and total_urls < MAX_URLS:
     browser.get(url)
     try:
         # Get Other Profiles if we're not over the limit
-        other_profiles = browser.find_element_by_class_name("pv-browsemap-section").find_element_by_tag_name("ul").find_elements_by_tag_name("li")
+        other_profiles = browser.find_element_by_class_name(
+            "pv-browsemap-section").find_element_by_tag_name("ul").find_elements_by_tag_name("li")
         if len(image_urls) + total_urls < MAX_URLS:
             for profile_row in other_profiles:
-                profile_link = profile_row.find_element_by_tag_name("a").get_attribute("href")
+                profile_link = profile_row.find_element_by_tag_name(
+                    "a").get_attribute("href")
                 # profile_link = "https://www.linkedin.com{}".format(profile_link)
                 urls_to_try.append(profile_link)
 
         print("Getting Profile Image...")
         # Get page's profile image
-        profile_image = browser.find_element_by_class_name("pv-top-card-section__photo")
+        profile_image = browser.find_element_by_class_name(
+            "pv-top-card-section__photo")
         try:
             raw_url = profile_image.value_of_css_property("background-image")
             image_urls.append(raw_url.replace('url("', "").replace('")', ""))
-        except Exception: # No Profile Picture
+        except Exception:  # No Profile Picture
             continue
         total_urls += 1
 
-    except Exception: # We're on the login page
+    except Exception:  # We're on the login page
         print("Exception, couldn't find the image.")
         # Set the URL to retry it
         urls_to_try.append(url)
 
         # Toggle sign-in form
-        signin_toggle = browser.find_element_by_css_selector("p.form-subtext.login")
+        signin_toggle = browser.find_element_by_css_selector(
+            "p.form-subtext.login")
         signin_toggle = signin_toggle.find_element_by_tag_name("a")
 
         signin_toggle.click()
@@ -84,3 +90,15 @@ while urls_to_try and total_urls < MAX_URLS:
 
 browser.close()
 print(image_urls)
+
+img_counter = 1
+
+for img_url in img_urls:
+    req = requests.get(img_url, stream=True)
+        path = "raw_data/{}.png".format(format_number(counter, 4))
+        if req.status_code == 200:
+            with open(path, 'wb') as f:
+                for chunk in req:
+                    f.write(chunk)
+
+        counter += 1
