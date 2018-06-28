@@ -17,6 +17,17 @@ def format_number(number, num_digits=3):
     """
     return str(number).zfill(num_digits)
 
+
+def write_photo(img_url, filename):
+    """Code to write photos from url to file."""
+    req = requests.get(img_url, stream=True)
+    path = "{}/{}.png".format(LINKEDIN_DIR, filename)
+    if req.status_code == 200:
+        with open(path, 'wb') as f:
+            for chunk in req:
+                f.write(chunk)
+
+
 # Set up preliminary folders/path stuff
 LINKEDIN_DIR = "photos"
 
@@ -40,13 +51,10 @@ MAX_URLS = 10
 total_urls = 1
 
 urls_to_try = ["https://www.linkedin.com/in/ali-turfah-66b895b1/"]
-image_urls = []
 browser = webdriver.Chrome(chromedriver_path)
+
 while urls_to_try and total_urls < MAX_URLS:
     url = urls_to_try[0]
-    print(url)
-
-    print(urls_to_try)
     urls_to_try.remove(url)
 
     browser.get(url)
@@ -54,11 +62,10 @@ while urls_to_try and total_urls < MAX_URLS:
         # Get Other Profiles if we're not over the limit
         other_profiles = browser.find_element_by_class_name(
             "pv-browsemap-section").find_element_by_tag_name("ul").find_elements_by_tag_name("li")
-        if len(image_urls) + total_urls < MAX_URLS:
-            for profile_row in other_profiles:
-                profile_link = profile_row.find_element_by_tag_name(
-                    "a").get_attribute("href")
-                # profile_link = "https://www.linkedin.com{}".format(profile_link)
+        
+        for profile_row in other_profiles:
+            if total_urls + len(urls_to_try) + len(other_profiles) < MAX_URLS:
+                profile_link = profile_row.find_element_by_tag_name("a").get_attribute("href")
                 urls_to_try.append(profile_link)
 
         print("Getting Profile Image...")
@@ -66,10 +73,14 @@ while urls_to_try and total_urls < MAX_URLS:
         profile_image = browser.find_element_by_class_name(
             "pv-top-card-section__photo")
         try:
-            raw_url = profile_image.value_of_css_property("background-image")
-            image_urls.append(raw_url.replace('url("', "").replace('")', ""))
-        except Exception:  # No Profile Picture
+            img_url = profile_image.value_of_css_property("background-image").replace('url("', "").replace('")', "")
+            if img_url == "https://static.licdn.com/sc/h/djzv59yelk5urv2ujlazfyvrk":
+                continue
+            write_photo(img_url,  format_number(total_urls, 4))
+
+        except Exception:  # No Profile Picture???
             continue
+
         total_urls += 1
 
     except Exception:  # We're on the login page
@@ -96,15 +107,3 @@ while urls_to_try and total_urls < MAX_URLS:
         login_btn.click()
 
 browser.close()
-print(image_urls)
-
-counter = 1
-for img_url in image_urls:
-    req = requests.get(img_url, stream=True)
-    path = "{}/{}.png".format(LINKEDIN_DIR, format_number(counter, 4))
-    if req.status_code == 200:
-        with open(path, 'wb') as f:
-            for chunk in req:
-                f.write(chunk)
-
-    counter += 1
