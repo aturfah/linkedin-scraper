@@ -51,6 +51,11 @@ while urls_to_try and total_urls < MAX_URLS:
 
         other_profiles = browser.find_element_by_class_name("pv-browsemap-section").find_element_by_tag_name("ul").find_elements_by_tag_name("li")
 
+        for profile_row in other_profiles:
+            profile_link = profile_row.find_element_by_tag_name("a").get_attribute("href")
+            profile_link = "https://www.linkedin.com{}".format(profile_link)
+            urls_to_try.append(profile_link)
+
     except Exception:
         print("Exception, couldn't find the image.")
         # Set the URL to retry it
@@ -73,5 +78,5 @@ while urls_to_try and total_urls < MAX_URLS:
 
         login_btn.click()
 
-browser.close()
+# browser.close()
 print(image_urls)
