@@ -99,7 +99,7 @@ browser.close()
 print(image_urls)
 
 counter = 1
-for img_url in img_urls:
+for img_url in image_urls:
     req = requests.get(img_url, stream=True)
     path = "photos/{}.png".format(format_number(counter, 4))
     if req.status_code == 200:
