@@ -48,10 +48,10 @@ chrome_options.add_argument("--headless")
 
 
 # Scrape Pages
-MAX_URLS = 10
+MAX_URLS = 50
 total_urls = 1
 
-urls_to_try = ["https://www.linkedin.com/in/ali-turfah-66b895b1/"]
+urls_to_try = ["https://www.linkedin.com/in/megha-tiwari-16839780/", "https://www.linkedin.com/in/ali-turfah-66b895b1/"]
 
 
 browser = webdriver.Chrome(chromedriver_path)
@@ -62,8 +62,9 @@ while urls_to_try and total_urls < MAX_URLS:
     browser.get(url)
     try:
         # Get Other Profiles if we're not over the limit
-        other_profiles = browser.find_element_by_class_name(
-            "pv-browsemap-section").find_element_by_tag_name("ul").find_elements_by_tag_name("li")
+        other_profiles = browser.find_element_by_class_name("pv-browsemap-section")
+        other_profiles = other_profiles.find_element_by_tag_name("ul")
+        other_profiles = other_profiles.find_elements_by_tag_name("li")
 
         for profile_row in other_profiles:
             if total_urls + len(urls_to_try) + len(other_profiles) < MAX_URLS:
@@ -71,7 +72,7 @@ while urls_to_try and total_urls < MAX_URLS:
                     "a").get_attribute("href")
                 urls_to_try.append(profile_link)
 
-        print("Getting Profile Image...")
+        print("Getting Profile Image #{}...".format(total_urls))
         # Get page's profile image
         profile_image = browser.find_element_by_class_name(
             "pv-top-card-section__photo")
@@ -83,6 +84,7 @@ while urls_to_try and total_urls < MAX_URLS:
             write_photo(img_url,  format_number(total_urls, 4))
 
         except Exception:  # No Profile Picture???
+            print("Failed, moving onto next script")
             continue
 
         total_urls += 1
