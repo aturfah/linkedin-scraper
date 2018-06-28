@@ -51,7 +51,7 @@ chrome_options.add_argument("--headless")
 MAX_URLS = 50
 total_urls = 1
 
-urls_to_try = ["https://www.linkedin.com/in/megha-tiwari-16839780/", "https://www.linkedin.com/in/ali-turfah-66b895b1/"]
+urls_to_try = ["https://www.linkedin.com/in/ali-turfah-66b895b1/"]
 
 
 browser = webdriver.Chrome(chromedriver_path)
@@ -62,7 +62,8 @@ while urls_to_try and total_urls < MAX_URLS:
     browser.get(url)
     try:
         # Get Other Profiles if we're not over the limit
-        other_profiles = browser.find_element_by_class_name("pv-browsemap-section")
+        other_profiles = browser.find_element_by_class_name(
+            "pv-browsemap-section")
         other_profiles = other_profiles.find_element_by_tag_name("ul")
         other_profiles = other_profiles.find_elements_by_tag_name("li")
 
@@ -92,24 +93,27 @@ while urls_to_try and total_urls < MAX_URLS:
     except Exception:  # We're on the login page
         print("Exception, couldn't find the image.")
         # Set the URL to retry it
-        urls_to_try.append(url)
+        try:
+            # Toggle sign-in form
+            signin_toggle = browser.find_element_by_css_selector(
+                "p.form-subtext.login")
+            signin_toggle = signin_toggle.find_element_by_tag_name("a")
 
-        # Toggle sign-in form
-        signin_toggle = browser.find_element_by_css_selector(
-            "p.form-subtext.login")
-        signin_toggle = signin_toggle.find_element_by_tag_name("a")
+            signin_toggle.click()
 
-        signin_toggle.click()
+            # Fill in sign-in form
+            signin_form = browser.find_element_by_class_name("login-form")
+            login_email = signin_form.find_element_by_id("login-email")
+            login_pass = signin_form.find_element_by_id("login-password")
+            login_btn = signin_form.find_element_by_id("login-submit")
 
-        # Fill in sign-in form
-        signin_form = browser.find_element_by_class_name("login-form")
-        login_email = signin_form.find_element_by_id("login-email")
-        login_pass = signin_form.find_element_by_id("login-password")
-        login_btn = signin_form.find_element_by_id("login-submit")
+            login_email.send_keys(LINKEDIN_USER)
+            login_pass.send_keys(LINKEDIN_PASS)
 
-        login_email.send_keys(LINKEDIN_USER)
-        login_pass.send_keys(LINKEDIN_PASS)
+            login_btn.click()
 
-        login_btn.click()
+            urls_to_try.append(url)
+        except Exception:
+            continue
 
 browser.close()
