@@ -9,6 +9,13 @@ from selenium.webdriver.chrome.options import Options
 
 import requests
 
+def format_number(number, num_digits=3):
+    """
+    Format a number with leading zeroes.
+
+    The number will take up at least num_digits digits.
+    """
+    return str(number).zfill(num_digits)
 
 # Set up preliminary folders/path stuff
 LINKEDIN_DIR = "photos"
@@ -91,14 +98,13 @@ while urls_to_try and total_urls < MAX_URLS:
 browser.close()
 print(image_urls)
 
-img_counter = 1
-
+counter = 1
 for img_url in img_urls:
     req = requests.get(img_url, stream=True)
-        path = "raw_data/{}.png".format(format_number(counter, 4))
-        if req.status_code == 200:
-            with open(path, 'wb') as f:
-                for chunk in req:
-                    f.write(chunk)
+    path = "photos/{}.png".format(format_number(counter, 4))
+    if req.status_code == 200:
+        with open(path, 'wb') as f:
+            for chunk in req:
+                f.write(chunk)
 
-        counter += 1
+    counter += 1
