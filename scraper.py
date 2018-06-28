@@ -9,6 +9,7 @@ from selenium.webdriver.chrome.options import Options
 
 import requests
 
+
 def format_number(number, num_digits=3):
     """
     Format a number with leading zeroes.
@@ -51,8 +52,9 @@ MAX_URLS = 10
 total_urls = 1
 
 urls_to_try = ["https://www.linkedin.com/in/ali-turfah-66b895b1/"]
-browser = webdriver.Chrome(chromedriver_path)
 
+
+browser = webdriver.Chrome(chromedriver_path)
 while urls_to_try and total_urls < MAX_URLS:
     url = urls_to_try[0]
     urls_to_try.remove(url)
@@ -62,10 +64,11 @@ while urls_to_try and total_urls < MAX_URLS:
         # Get Other Profiles if we're not over the limit
         other_profiles = browser.find_element_by_class_name(
             "pv-browsemap-section").find_element_by_tag_name("ul").find_elements_by_tag_name("li")
-        
+
         for profile_row in other_profiles:
             if total_urls + len(urls_to_try) + len(other_profiles) < MAX_URLS:
-                profile_link = profile_row.find_element_by_tag_name("a").get_attribute("href")
+                profile_link = profile_row.find_element_by_tag_name(
+                    "a").get_attribute("href")
                 urls_to_try.append(profile_link)
 
         print("Getting Profile Image...")
@@ -73,7 +76,8 @@ while urls_to_try and total_urls < MAX_URLS:
         profile_image = browser.find_element_by_class_name(
             "pv-top-card-section__photo")
         try:
-            img_url = profile_image.value_of_css_property("background-image").replace('url("', "").replace('")', "")
+            img_url = profile_image.value_of_css_property(
+                "background-image").replace('url("', "").replace('")', "")
             if img_url == "https://static.licdn.com/sc/h/djzv59yelk5urv2ujlazfyvrk":
                 continue
             write_photo(img_url,  format_number(total_urls, 4))
