@@ -41,22 +41,24 @@ while urls_to_try and total_urls < MAX_URLS:
 
     browser.get(url)
     try:
-        print("Getting Profile Image...")
-        # Get page's profile image
-        profile_image = browser.find_element_by_class_name("pv-top-card-section__photo")
-        raw_url = profile_image.value_of_css_property("background-image")
-        image_urls.append(raw_url.replace('url("', "").replace('")', ""))
-
-        total_urls += 1
-
+        # Get Other Profiles
         other_profiles = browser.find_element_by_class_name("pv-browsemap-section").find_element_by_tag_name("ul").find_elements_by_tag_name("li")
-
         for profile_row in other_profiles:
             profile_link = profile_row.find_element_by_tag_name("a").get_attribute("href")
             profile_link = "https://www.linkedin.com{}".format(profile_link)
             urls_to_try.append(profile_link)
 
-    except Exception:
+        print("Getting Profile Image...")
+        # Get page's profile image
+        profile_image = browser.find_element_by_class_name("pv-top-card-section__photo")
+        try:
+            raw_url = profile_image.value_of_css_property("background-image")
+            image_urls.append(raw_url.replace('url("', "").replace('")', ""))
+        except Exception: # No Profile Picture
+            continue
+        total_urls += 1
+
+    except Exception: # We're on the login page
         print("Exception, couldn't find the image.")
         # Set the URL to retry it
         urls_to_try.append(url)
@@ -78,5 +80,5 @@ while urls_to_try and total_urls < MAX_URLS:
 
         login_btn.click()
 
-# browser.close()
+browser.close()
 print(image_urls)
