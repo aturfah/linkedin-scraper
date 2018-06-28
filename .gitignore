@@ -2,3 +2,4 @@ env/
 chromedriver.exe
 *.log
 .vscode
+photos/
