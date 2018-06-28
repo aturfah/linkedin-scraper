@@ -1,5 +1,4 @@
 """Scraper to pull images from Linkedin."""
-
 from os import makedirs, getcwd
 import sys
 from os.path import join, exists
@@ -45,7 +44,8 @@ while urls_to_try and total_urls < MAX_URLS:
         print("Getting Profile Image...")
         # Get page's profile image
         profile_image = browser.find_element_by_class_name("pv-top-card-section__photo")
-        image_urls.append(profile_image.value_of_css_property("background-image"))
+        raw_url = profile_image.value_of_css_property("background-image")
+        image_urls.append(raw_url.replace('url("', "").replace('")', ""))
 
         total_urls += 1
 
